@@ -1,0 +1,1 @@
+insert into Aluno(id, nome, unidade, data_saida) VALUES(1,'Fabricio Junior de Campos', 'MUNICIPAL', '2010-10-10');
