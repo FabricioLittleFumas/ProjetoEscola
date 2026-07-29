@@ -29,7 +29,7 @@ public class SecurityConfig {
 
 		http.authorizeHttpRequests(auth -> auth
 				// Rotas públicas (permitidas sem autenticação)
-				.requestMatchers("/home", "/usuarios", "/saveUser").permitAll()
+				.requestMatchers("/home", "/alunos/**", "/saveUser").permitAll()
 
 				// Rotas que exigem autenticação
 				.requestMatchers("/welcome").authenticated()
