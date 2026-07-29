@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,10 @@ public class Aluno implements Serializable {
 
 	@Id
 	@EqualsAndHashCode.Include
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, 
+	generator = "seq_aluno")
+	@SequenceGenerator(name = "seq_aluno", sequenceName = 
+	"sq_aluno", initialValue = 100, allocationSize = 100)
 	private Long id;
 	private String nome;
 	private Date dataSaida;
