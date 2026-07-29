@@ -1,1 +1,17 @@
-insert into Aluno(id, nome, unidade, data_saida) VALUES(1,'Fabricio Junior de Campos', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(1,'Aluno 1', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(2,'Aluno 2', 'ESTADUAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(3,'Aluno 3', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(4,'Aluno 4', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(5,'Aluno 5', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(6,'Aluno 6', 'ESTADUAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(7,'Aluno 7', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(8,'Aluno 8', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(9,'Aluno 9', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(10,'Aluno 10', 'ESTADUAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(11,'Aluno 11', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(12,'Aluno 12', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(13,'Aluno 13', 'ESTADUAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(14,'Aluno 14', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(15,'Aluno 15', 'MUNICIPAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(16,'Aluno 16', 'ESTADUAL', '2010-10-10');
+insert into Aluno(id, nome, unidade, data_saida) VALUES(17,'Aluno 17', 'MUNICIPAL', '2010-10-10');

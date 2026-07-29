@@ -2,7 +2,6 @@ package br.com.noticiarioOficial.controller;
 
 import java.util.ArrayList;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,8 +20,11 @@ import br.com.noticiarioOficial.service.AlunoService;
 @RequestMapping("/alunos")
 public class AlunoController {
 
-	@Autowired
-	private AlunoService alunoService;
+	private final AlunoService alunoService;
+
+	AlunoController(AlunoService alunoService) {
+		this.alunoService = alunoService;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<ArrayList<Aluno>> buscaTodos() {
