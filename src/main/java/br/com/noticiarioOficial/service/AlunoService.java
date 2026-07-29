@@ -53,4 +53,10 @@ public class AlunoService {
 			throw new ExcecaoInserirAluno("erro ao inserir aluno.");
 		}
 	}
+
+	public ArrayList<Aluno> buscaPorNome(String nome) {
+		// TODO Auto-generated method stub
+		ArrayList<Aluno> alunos =  alunoRepository.findByNome(nome);
+		return alunos;
+	}
 }

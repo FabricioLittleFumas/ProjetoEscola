@@ -37,6 +37,11 @@ public class AlunoController {
 		Aluno aluno = alunoService.buscarPorID(id);
 		return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
 	}
+	@GetMapping("/nome/{nome}")
+	public ResponseEntity<ArrayList<Aluno>> buscaPorNome(@PathVariable(name = "nome") String nome){
+		ArrayList<Aluno> alunos = alunoService.buscaPorNome(nome);
+		return new ResponseEntity<ArrayList<Aluno>> (alunos, HttpStatus.OK);
+	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletarPorId(@PathVariable(name = "id") Long id){
