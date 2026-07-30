@@ -1,38 +1,33 @@
 package br.com.noticiarioOficial.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import br.com.noticiarioOficial.model.User;
 import br.com.noticiarioOficial.repository.IUserService;
 
 
-@Controller
+@RestController
+@RequestMapping("/usuario")
 public class UserController {
 
 	@Autowired
 	private IUserService userService;
 	
-	// Go to Registration Page
-	@GetMapping("/register")
-	public String register() {
-		return "registerUser";
-	}
 	
 	// Read Form data to save into DB
 	@PostMapping("/saveUser")
-	public String saveUser(
-			@ModelAttribute User user,
-			Model model
-			) 
+	public ResponseEntity<Integer> saveUser(
+			@RequestBody User user) 
 	{
 		Integer id = userService.saveUser(user);
 		String message = "User '"+id+"' saved successfully !";
-		model.addAttribute("msg", message);
-		return "registerUser";
+		return new ResponseEntity<Integer>(id, HttpStatus.ACCEPTED);
 	}
 }

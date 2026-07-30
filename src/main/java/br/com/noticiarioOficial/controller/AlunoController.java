@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class AlunoController {
 		return new ResponseEntity<ArrayList<Aluno>>(alunos, HttpStatus.OK);
 	}
 	
+//	@PreAuthorize("hasAuthority('Admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Aluno> buscaPorID(@PathVariable(name = "id") Long id ){
 		Aluno aluno = alunoService.buscarPorID(id);
