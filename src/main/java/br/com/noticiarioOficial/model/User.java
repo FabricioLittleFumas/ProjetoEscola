@@ -27,7 +27,7 @@ public class User {
 	@Column(name = "user_passwd")
 	private String password;
 
-	@Column(name = "user_email")
+	@Column(name = "user_email", unique = true)
 	private String email;
 
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -35,6 +35,7 @@ public class User {
 	@Column(name = "user_role")
 	private List<String> roles;
 
+	// Getters e Setters
 	public Integer getId() {
 		return id;
 	}
@@ -74,5 +75,4 @@ public class User {
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
-
 }
