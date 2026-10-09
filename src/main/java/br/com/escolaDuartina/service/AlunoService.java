@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -11,11 +12,14 @@ import br.com.escolaDuartina.excecao.Excecao;
 import br.com.escolaDuartina.excecao.ExcecaoInserirAluno;
 import br.com.escolaDuartina.model.Aluno;
 import br.com.escolaDuartina.repository.AlunoRepository;
+import br.com.escolaDuartina.util.MapaErrosBD;
 
 @Service
 public class AlunoService {
 
 	private final AlunoRepository alunoRepository;
+	@Autowired
+	MapaErrosBD mapaErrosBD;
 
 	AlunoService(AlunoRepository alunoRepository) {
 		this.alunoRepository = alunoRepository;
@@ -47,18 +51,22 @@ public class AlunoService {
 
 	public Aluno inserirAluno(Aluno aluno) {
 		try {
-			System.out.println("aq");
-			System.out.println(aluno);
+//			System.out.println("aq");
+//			System.out.println(aluno);
 			Aluno aluno2 = alunoRepository.save(aluno);
 			return aluno2;
 		} catch (DataIntegrityViolationException e) {
-			throw new ExcecaoInserirAluno("erro ao inserir aluno.");
+//			System.out.println("message");
+//			System.out.println(e.getMessage());
+//			System.out.println(mapaErrosBD.getErros(e.getMessage()));
+//			String erroMessage = mapaErrosBD.getErros(e.getMessage());
+			throw new ExcecaoInserirAluno(mapaErrosBD.getErros(e.getMessage()));
 		}
 	}
 
 	public ArrayList<Aluno> buscaPorNome(String nome) {
 		// TODO Auto-generated method stub
-		ArrayList<Aluno> alunos =  alunoRepository.findByNome(nome);
+		ArrayList<Aluno> alunos = alunoRepository.findByNome(nome);
 		return alunos;
 	}
 }

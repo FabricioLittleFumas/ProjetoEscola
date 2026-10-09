@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.escolaDuartina.model.Aluno;
 import br.com.escolaDuartina.service.AlunoService;
+import jakarta.validation.Valid;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -63,7 +63,7 @@ public class AlunoController {
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/")
-	public ResponseEntity<Aluno> inserirAluno(@RequestBody Aluno aluno){
+	public ResponseEntity<Aluno> inserirAluno(@Valid @RequestBody Aluno aluno){
 		System.out.println("aluno no persist");
 		System.out.println(aluno.getData_saida());
 		Aluno aluno2 = alunoService.inserirAluno(aluno);

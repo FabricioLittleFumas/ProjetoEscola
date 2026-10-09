@@ -49,13 +49,13 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
-				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
+				authz -> authz.requestMatchers("/alunos/**","/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
 //				authz -> authz.requestMatchers(HttpMethod.GET, "/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
 //				.requestMatchers(null)
 				.requestMatchers(HttpMethod.POST, "/usuario/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/autentica/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/alunos/**").hasAuthority("USER")
-				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
+//				.requestMatchers(HttpMethod.GET, "/alunos/**").hasAuthority("USER")
+//				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
 				//				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
 //                .requestMatchers("/alunos/**").hasAuthority("Admin")
 				.anyRequest().authenticated())
