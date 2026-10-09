@@ -1,11 +1,26 @@
 package br.com.escolaDuartina.model;
 
+import java.util.HashMap;
+
 public class ErroTipo {
 
 	private int status;
 	private String error;
 	private String message;
 	private String path;
+	HashMap<String, String> erroValidacao;
+	
+	public ErroTipo() {
+		erroValidacao = new HashMap<>();
+	}
+
+	public HashMap<String, String> getErroValidacao() {
+		return erroValidacao;
+	}
+
+	public void setErroValidacao(HashMap<String, String> erroValidacao) {
+		this.erroValidacao = erroValidacao;
+	}
 
 	@Override
 	public String toString() {

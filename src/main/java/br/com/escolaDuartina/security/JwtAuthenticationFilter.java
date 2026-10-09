@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private UserInfoUserDetailsService userDetailsService;
 
 	// Lista de rotas que não precisam de autenticação
-	private static final String[] PUBLIC_ROUTES = { "/authenticate", "/register", "/saveUser", "/home" };
+	private static final String[] PUBLIC_ROUTES = {"/alunos", "/authenticate", "/register", "/saveUser", "/home" };
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -34,13 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 
 		String path = request.getRequestURI();
-		System.out.println("cheguei aqui 1");
-		System.out.println(request.getRequestURI());
-		System.out.println("cheguei aqui 1");
+//		System.out.println("cheguei aqui 1");
+//		System.out.println(request.getRequestURI());
+//		System.out.println("cheguei aqui 1");
 		// Verifica se a rota é pública
 		if (isPublicRoute(path, request.getMethod())) {
-			System.out.println("cheguei aqui 2");
-			System.out.println(request.getMethod());
+//			System.out.println("cheguei aqui 2");
+//			System.out.println(request.getMethod());
 			chain.doFilter(request, response);
 			return;				
 		}
@@ -53,8 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String username = null;
 		String jwtToken = null;
-		System.out.println("token bearer");
-		System.out.println(requestTokenHeader);
+//		System.out.println("token bearer");
+//		System.out.println(requestTokenHeader);
 //		request.getHeaderNames().asIterator().forEachRemaining(item ->{
 //			System.out.println(item);
 //		});
@@ -65,8 +65,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			System.out.println(requestTokenHeader.substring(7));
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-				System.out.println("username");
-				System.out.println(username);
+//				System.out.println("username");
+//				System.out.println(username);
 			} catch (IllegalArgumentException e) {
 				System.out.println("Unable to get JWT Token");
 			} catch (ExpiredJwtException e) {
