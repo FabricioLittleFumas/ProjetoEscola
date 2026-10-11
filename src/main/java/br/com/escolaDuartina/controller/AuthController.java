@@ -39,8 +39,6 @@ public class AuthController {
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
 
 		final String token = jwtTokenUtil.generateToken(userDetails);
-		System.out.println("token criado login");
-		System.out.println(token);
 		return ResponseEntity.ok(new JwtResponse("Bearer " + token));
 	}
 

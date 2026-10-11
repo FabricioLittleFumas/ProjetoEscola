@@ -42,7 +42,7 @@ public class AlunoService {
 		alunoRepository.deleteById(id);
 	}
 
-	public Aluno atualizarNoticia(long id, Aluno alunoAtualizado) {
+	public Aluno atualizarAluno(long id, Aluno alunoAtualizado) {
 		// TODO Auto-generated method stub
 		Aluno aluno = buscarPorID(id);
 		BeanUtils.copyProperties(alunoAtualizado, aluno, "id");

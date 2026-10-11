@@ -64,6 +64,7 @@ public class JwtTokenUtil {
 
 	// Criação do token
 	private String doGenerateToken(Map<String, Object> claims, String subject) {
+		System.out.println("token expiracao" + new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000));
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();

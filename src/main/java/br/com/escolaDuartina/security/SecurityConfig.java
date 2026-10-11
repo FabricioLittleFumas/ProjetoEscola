@@ -21,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
+	@Autowired
+	private CorsConfig corsConfig;
 
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -48,13 +50,20 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
-				authz -> authz.requestMatchers("/alunos/**","/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
+		
+		http
+	    .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
+	    .csrf(csrf -> csrf.disable())
+	    .authorizeHttpRequests(
+				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/usuario/**", "/autentica/**").permitAll()
 //				authz -> authz.requestMatchers(HttpMethod.GET, "/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
 //				.requestMatchers(null)
 				.requestMatchers(HttpMethod.POST, "/usuario/**").permitAll()
 				.requestMatchers(HttpMethod.POST, "/autentica/**").permitAll()
-//				.requestMatchers(HttpMethod.GET, "/alunos/**").hasAuthority("USER")
+				.requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
+				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
+				.requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
+				.requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER")
 //				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
 				//				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
 //                .requestMatchers("/alunos/**").hasAuthority("Admin")
