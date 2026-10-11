@@ -23,7 +23,8 @@ public class UserInfoUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		Optional<User> opt = userRepo.findUserByEmail(email);
+		@SuppressWarnings("unchecked")
+		Optional<User> opt = (Optional<User>) userRepo.findUserByEmail(email);
 
 		if (opt.isEmpty()) {
 			throw new UsernameNotFoundException("User with email: " + email + " not found !");

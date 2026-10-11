@@ -58,14 +58,12 @@ public class AlunoController {
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping("/{id}")
 	public ResponseEntity<Aluno> atualizaAluno(@PathVariable(name = "id") long id, @RequestBody Aluno AlunoAtualizado){
-		Aluno aluno = alunoService.atualizarNoticia(id, AlunoAtualizado);
+		Aluno aluno = alunoService.atualizarAluno(id, AlunoAtualizado);
 		return new ResponseEntity<Aluno>(aluno, HttpStatus.ACCEPTED);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/")
 	public ResponseEntity<Aluno> inserirAluno(@Valid @RequestBody Aluno aluno){
-		System.out.println("aluno no persist");
-		System.out.println(aluno.getData_saida());
 		Aluno aluno2 = alunoService.inserirAluno(aluno);
 		return new ResponseEntity<Aluno>(aluno2, HttpStatus.CREATED);
 	}

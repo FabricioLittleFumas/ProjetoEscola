@@ -3,8 +3,6 @@ package br.com.escolaDuartina.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import br.com.escolaDuartina.enums.Unidade;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +18,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -41,12 +38,10 @@ public class Aluno implements Serializable {
 
 	@Id
 	@EqualsAndHashCode.Include
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, 
-	generator = "seq_aluno")
-	@SequenceGenerator(name = "seq_aluno", sequenceName = 
-	"sq_aluno", initialValue = 100, allocationSize = 100)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_aluno")
+	@SequenceGenerator(name = "seq_aluno", sequenceName = "sq_aluno", initialValue = 100, allocationSize = 100)
 	private Long id;
-	
+
 	@NotBlank(message = "O nome é obrigatório")
 	@Size(min = 3, max = 100, message = "O nome deve ter entre {min} e {max} caracteres")
 	@NotEmpty
@@ -55,7 +50,6 @@ public class Aluno implements Serializable {
 	private String nome;
 
 	@Temporal(TemporalType.DATE)
-	
 	@Past(message = "A data deve ser no passado")
 	@Column(name = "data_saida", nullable = false)
 //	@JsonFormat(pattern = "dd/MM/yyyy")

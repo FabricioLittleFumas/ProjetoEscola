@@ -8,5 +8,5 @@ import br.com.escolaDuartina.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional findUserByEmail(String email);
+	Optional<?> findUserByEmail(String email);
 }
