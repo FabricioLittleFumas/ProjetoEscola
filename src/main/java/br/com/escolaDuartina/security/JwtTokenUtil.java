@@ -18,7 +18,8 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtTokenUtil {
 
-	public static final long JWT_TOKEN_VALIDITY = 120;
+	// Access Token: 15 minutos
+	public static final long ACCESS_TOKEN_VALIDITY = 15 * 60;
 
 	@Value("${jwt.secret}")
 	private String secret;
@@ -28,12 +29,10 @@ public class JwtTokenUtil {
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
-	// Extrair username do token
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
 
-	// Extrair data de expiração do token
 	public Date getExpirationDateFromToken(String token) {
 		return getClaimFromToken(token, Claims::getExpiration);
 	}
@@ -43,34 +42,27 @@ public class JwtTokenUtil {
 		return claimsResolver.apply(claims);
 	}
 
-	// Para obter informações do token, precisamos da chave secreta
 	private Claims getAllClaimsFromToken(String token) {
 		return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
 	}
 
-	// Verificar se o token expirou
 	private Boolean isTokenExpired(String token) {
 		final Date expiration = getExpirationDateFromToken(token);
 		return expiration.before(new Date());
 	}
 
-	// Gerar token para usuário
-	public String generateToken(UserDetails userDetails) {
+	public String generateAccessToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
-		// Adicionar authorities ao token
 		claims.put("authorities", userDetails.getAuthorities());
-		return doGenerateToken(claims, userDetails.getUsername());
+		return doGenerateToken(claims, userDetails.getUsername(), ACCESS_TOKEN_VALIDITY);
 	}
 
-	// Criação do token
-	private String doGenerateToken(Map<String, Object> claims, String subject) {
-		System.out.println("token expiracao" + new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000));
+	private String doGenerateToken(Map<String, Object> claims, String subject, long validadeSegundos) {
 		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() + validadeSegundos * 1000))
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
 	}
 
-	// Validar token
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String username = getUsernameFromToken(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
