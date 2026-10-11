@@ -50,24 +50,16 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		
-		http
-	    .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
-	    .csrf(csrf -> csrf.disable())
-	    .authorizeHttpRequests(
-				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/usuario/**", "/autentica/**").permitAll()
-//				authz -> authz.requestMatchers(HttpMethod.GET, "/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
-//				.requestMatchers(null)
-				.requestMatchers(HttpMethod.POST, "/usuario/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/autentica/**").permitAll()
-				.requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
-				.requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
-				.requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER")
-//				.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
-				//				authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser", "/alunos/**", "/usuario/**", "/autentica/**").permitAll()
-//                .requestMatchers("/alunos/**").hasAuthority("Admin")
-				.anyRequest().authenticated())
+
+		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())).csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser")
+						.permitAll().requestMatchers("/usuario/**").permitAll()
+						.requestMatchers("/autentica/authenticate", "/autentica/refresh").permitAll()
+						.requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
+						.requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
+						.requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER").anyRequest()
+						.authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
