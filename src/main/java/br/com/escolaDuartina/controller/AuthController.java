@@ -27,70 +27,59 @@ import br.com.escolaDuartina.service.RefreshTokenService;
 @CrossOrigin
 public class AuthController {
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	@Autowired private AuthenticationManager authenticationManager;
+    @Autowired private JwtTokenUtil jwtTokenUtil;
+    @Autowired private UserInfoUserDetailsService userDetailsService;
+    @Autowired private RefreshTokenService refreshTokenService;
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) {
+        authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
 
-	@Autowired
-	private UserInfoUserDetailsService userDetailsService;
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
+        final String refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-	@Autowired
-	private RefreshTokenService refreshTokenService;
+        return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
+    }
 
-	@PostMapping("/authenticate")
-	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-		authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshTokenValue = request.get("refreshToken");
 
-		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
+        if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Refresh token ausente"));
+        }
 
-		// Gera os DOIS tokens
-		final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
-		final String refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
+        try {
+            RefreshToken stored = refreshTokenService.findByToken(refreshTokenValue)
+                    .orElseThrow(() -> new RuntimeException("Refresh token não encontrado"));
 
-		return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
-	}
+            if (refreshTokenService.isExpired(stored)) {
+                refreshTokenService.deleteByToken(refreshTokenValue);
+                return ResponseEntity.status(401).body(Map.of("message", "Refresh token expirado"));
+            }
 
-	@PostMapping("/refresh")
-	public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
-		String refreshTokenValue = request.get("refreshToken");
+            String email = stored.getUser().getEmail();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-		if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
-			return ResponseEntity.badRequest().body(Map.of("message", "Refresh token ausente"));
-		}
+            String novoAccessToken = jwtTokenUtil.generateAccessToken(userDetails);
+            refreshTokenService.deleteByToken(refreshTokenValue);
+            String novoRefreshToken = refreshTokenService.createRefreshToken(email);
 
-		try {
-			RefreshToken stored = refreshTokenService.findByToken(refreshTokenValue)
-					.orElseThrow(() -> new RuntimeException("Refresh token não encontrado"));
+            return ResponseEntity.ok(Map.of("accessToken", novoAccessToken, "refreshToken", novoRefreshToken));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "Falha ao renovar token"));
+        }
+    }
 
-			if (refreshTokenService.isExpired(stored)) {
-				refreshTokenService.deleteByToken(refreshTokenValue);
-				return ResponseEntity.status(401).body(Map.of("message", "Refresh token expirado"));
-			}
-
-			String email = stored.getUser().getEmail();
-			UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-			String novoAccessToken = jwtTokenUtil.generateAccessToken(userDetails);
-
-			// Rotação: invalida o antigo e cria um novo
-			refreshTokenService.deleteByToken(refreshTokenValue);
-			String novoRefreshToken = refreshTokenService.createRefreshToken(email);
-
-			return ResponseEntity.ok(Map.of("accessToken", novoAccessToken, "refreshToken", novoRefreshToken));
-		} catch (Exception e) {
-			return ResponseEntity.status(401).body(Map.of("message", "Falha ao renovar token"));
-		}
-	}
-
-	private void authenticate(String email, String password) throws Exception {
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-		} catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
-		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
-		}
-	}
+    private void authenticate(String email, String password) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        } catch (DisabledException e) {
+            throw new DisabledException("USER_DISABLED");
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("INVALID_CREDENTIALS");
+        }
+    }
 }

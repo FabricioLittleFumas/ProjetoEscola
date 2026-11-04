@@ -17,6 +17,7 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:4200")); // origem do Angular
+//        config.setAllowedOrigins(List.of("https://localhost")); // origem do Angular
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));       // permite Authorization, Content-Type, etc.
         config.setExposedHeaders(List.of("Authorization"));
