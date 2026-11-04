@@ -52,14 +52,14 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())).csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(authz -> authz.requestMatchers("/authenticate/**", "/register", "/saveUser")
-						.permitAll().requestMatchers("/usuario/**").permitAll()
-						.requestMatchers("/autentica/authenticate", "/autentica/refresh").permitAll()
-						.requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
-						.requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
-						.requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER").anyRequest()
-						.authenticated())
+				.authorizeHttpRequests(authz -> authz
+		                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+		                .requestMatchers("/autentica/**", "/usuario/**").permitAll()
+		                .requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
+		                .requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
+		                .requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
+		                .requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER")
+		                .anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
