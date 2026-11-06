@@ -55,7 +55,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authz -> authz
 		                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 		                .requestMatchers("/autentica/**", "/usuario/**").permitAll()
-		                .requestMatchers(HttpMethod.GET, "/alunos/**").permitAll()
+			                .requestMatchers(HttpMethod.GET, "/alunos", "/alunos/**").permitAll()
 		                .requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
 		                .requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
 		                .requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER")
