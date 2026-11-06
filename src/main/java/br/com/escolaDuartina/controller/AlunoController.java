@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.escolaDuartina.model.Aluno;
@@ -19,7 +20,7 @@ import br.com.escolaDuartina.service.AlunoService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://127.0.0.1:4200")
 @RequestMapping("/alunos")
 public class AlunoController {
 
@@ -29,7 +30,7 @@ public class AlunoController {
 		this.alunoService = alunoService;
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
-	@GetMapping("/")
+	@GetMapping({"", "/"})
 	public ResponseEntity<ArrayList<Aluno>> buscaTodos() {
 		ArrayList<Aluno> alunos = alunoService.buscarTodos();
 		return new ResponseEntity<ArrayList<Aluno>>(alunos, HttpStatus.OK);
@@ -48,6 +49,11 @@ public class AlunoController {
 		ArrayList<Aluno> alunos = alunoService.buscaPorNome(nome);
 		return new ResponseEntity<ArrayList<Aluno>> (alunos, HttpStatus.OK);
 	}
+
+	@GetMapping("/buscar")
+	public ResponseEntity<ArrayList<Aluno>> pesquisarPorNome(@RequestParam(name = "nome", defaultValue = "") String nome) {
+		return ResponseEntity.ok(alunoService.buscaPorNome(nome));
+	}
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@DeleteMapping("/{id}")
@@ -62,7 +68,7 @@ public class AlunoController {
 		return new ResponseEntity<Aluno>(aluno, HttpStatus.ACCEPTED);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
-	@PostMapping("/")
+	@PostMapping({"", "/"})
 	public ResponseEntity<Aluno> inserirAluno(@Valid @RequestBody Aluno aluno){
 		Aluno aluno2 = alunoService.inserirAluno(aluno);
 		return new ResponseEntity<Aluno>(aluno2, HttpStatus.CREATED);

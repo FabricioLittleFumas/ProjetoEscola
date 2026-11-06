@@ -65,8 +65,10 @@ public class AlunoService {
 	}
 
 	public ArrayList<Aluno> buscaPorNome(String nome) {
-		// TODO Auto-generated method stub
-		ArrayList<Aluno> alunos = alunoRepository.findByNome(nome);
-		return alunos;
+		String nomeNormalizado = nome == null ? "" : nome.trim();
+		if (nomeNormalizado.isEmpty()) {
+			return buscarTodos();
+		}
+		return new ArrayList<>(alunoRepository.findByNomeContainingIgnoreCase(nomeNormalizado));
 	}
 }
