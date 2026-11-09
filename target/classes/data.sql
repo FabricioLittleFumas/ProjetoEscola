@@ -1,3 +1,4 @@
+ALTER TABLE IF EXISTS log_system ALTER COLUMN acao TYPE TEXT;
 INSERT INTO aluno (id, nome, unidade, data_saida) VALUES (1, 'Ana Beatriz Silva Oliveira', 'ESTADUAL', DATE '2011-01-01') ON CONFLICT DO NOTHING;
 INSERT INTO aluno (id, nome, unidade, data_saida) VALUES (2, 'Ana Beatriz Oliveira Santos', 'MUNICIPAL', DATE '2012-02-02') ON CONFLICT DO NOTHING;
 INSERT INTO aluno (id, nome, unidade, data_saida) VALUES (3, 'Ana Beatriz Santos Pereira', 'ESTADUAL', DATE '2013-03-03') ON CONFLICT DO NOTHING;
