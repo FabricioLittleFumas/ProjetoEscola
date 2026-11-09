@@ -2,10 +2,15 @@ package br.com.escolaDuartina.service;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.escolaDuartina.excecao.Excecao;
@@ -70,5 +75,20 @@ public class AlunoService {
 			return buscarTodos();
 		}
 		return new ArrayList<>(alunoRepository.findByNomeContainingIgnoreCase(nomeNormalizado));
+	}
+
+	public Page<Aluno> buscarPagina(int pagina, int tamanho, String ordenacao, String direcao, String nome) {
+		int paginaValida = Math.max(pagina, 0);
+		int tamanhoValido = Math.min(Math.max(tamanho, 1), 100);
+		Set<String> camposOrdenaveis = Set.of("id", "nome", "data_saida", "dataSaida", "unidade");
+		String campoOrdenacao = camposOrdenaveis.contains(ordenacao) ? ("dataSaida".equals(ordenacao) ? "data_saida" : ordenacao) : "nome";
+		Sort.Direction sentido = "DESC".equalsIgnoreCase(direcao) ? Sort.Direction.DESC : Sort.Direction.ASC;
+		Pageable pageable = PageRequest.of(paginaValida, tamanhoValido, Sort.by(sentido, campoOrdenacao));
+		String nomeNormalizado = nome == null ? "" : nome.trim();
+
+		if (nomeNormalizado.isEmpty()) {
+			return alunoRepository.findAll(pageable);
+		}
+		return alunoRepository.findByNomeContainingIgnoreCase(nomeNormalizado, pageable);
 	}
 }

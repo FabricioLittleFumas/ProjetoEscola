@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.escolaDuartina.model.Aluno;
+import br.com.escolaDuartina.dto.PaginaResposta;
 import br.com.escolaDuartina.service.AlunoService;
 import jakarta.validation.Valid;
 
@@ -53,6 +54,19 @@ public class AlunoController {
 	@GetMapping("/buscar")
 	public ResponseEntity<ArrayList<Aluno>> pesquisarPorNome(@RequestParam(name = "nome", defaultValue = "") String nome) {
 		return ResponseEntity.ok(alunoService.buscaPorNome(nome));
+	}
+
+	@GetMapping("/paginado")
+	public ResponseEntity<PaginaResposta<Aluno>> buscarPaginado(
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(name = "size", defaultValue = "10") int size,
+			@RequestParam(name = "sort", defaultValue = "nome") String sort,
+			@RequestParam(name = "direction", defaultValue = "ASC") String direction,
+			@RequestParam(name = "nome", defaultValue = "") String nome) {
+		var resultado = alunoService.buscarPagina(page, size, sort, direction, nome);
+		var resposta = new PaginaResposta<>(resultado.getContent(), resultado.getNumber(), resultado.getSize(),
+				resultado.getTotalElements(), resultado.getTotalPages(), resultado.isFirst(), resultado.isLast());
+		return ResponseEntity.ok(resposta);
 	}
 	
 	@CrossOrigin(origins = "http://localhost:4200")
