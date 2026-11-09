@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -24,7 +25,8 @@ import jakarta.validation.constraints.Size;
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user_generator")
+	@SequenceGenerator(name = "seq_user_generator", sequenceName = "sq_user", initialValue = 100, allocationSize = 1)
 	@Column(name = "user_id")
 	private Integer id;
 
@@ -49,6 +51,9 @@ public class User {
 	@Email(message = "E-mail inválido")
 	@Column(name = "user_email", unique = true)
 	private String email;
+
+	@Column(name = "approved", nullable = false, columnDefinition = "boolean default false")
+	private boolean approved = false;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -86,6 +91,14 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public boolean isApproved() {
+		return approved;
+	}
+
+	public void setApproved(boolean approved) {
+		this.approved = approved;
 	}
 
 	public List<String> getRoles() {

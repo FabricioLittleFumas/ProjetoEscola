@@ -1,5 +1,13 @@
 -- 99 alunos de exemplo; nomes unicos, campos obrigatorios preenchidos e datas passadas.
 -- IDs de 1 a 99; a sequencia sq_aluno do modelo inicia em 100.
+-- Administrador inicial. A senha "admin" está codificada com BCrypt (cost 10).
+INSERT INTO users (user_id, user_name, user_passwd, user_email, approved)
+VALUES (nextval('sq_user'), 'admin', '$2a$10$YwKsiruEENp6iyE1LEWvQezAc3mlNeWhYH2Pw/0aTYL4Yrq5bPjsG', 'admin@gmail.com', TRUE);
+INSERT INTO roles (user_id, user_role)
+SELECT user_id, 'ADMIN' FROM users WHERE user_email = 'admin@gmail.com';
+INSERT INTO roles (user_id, user_role)
+SELECT user_id, 'USER' FROM users WHERE user_email = 'admin@gmail.com';
+
 INSERT INTO Aluno (id, nome, unidade, data_saida) VALUES (1, 'Ana Beatriz Silva Oliveira', 'ESTADUAL', DATE '2011-01-01');
 INSERT INTO Aluno (id, nome, unidade, data_saida) VALUES (2, 'Ana Beatriz Oliveira Santos', 'MUNICIPAL', DATE '2012-02-02');
 INSERT INTO Aluno (id, nome, unidade, data_saida) VALUES (3, 'Ana Beatriz Santos Pereira', 'ESTADUAL', DATE '2013-03-03');
