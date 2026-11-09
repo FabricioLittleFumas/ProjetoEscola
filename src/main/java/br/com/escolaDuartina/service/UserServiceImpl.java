@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import br.com.escolaDuartina.model.User;
 import br.com.escolaDuartina.repository.UserRepository;
@@ -38,6 +39,11 @@ public class UserServiceImpl implements IUserService {
 	@Transactional(readOnly = true)
 	public List<User> listarUsuariosPendentes() {
 		return userRepo.findByApprovedFalseOrderByNameAsc();
+	}
+
+	@Transactional(readOnly = true)
+	public User buscarPorId(Integer id) {
+		return userRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Usuário não encontrado"));
 	}
 
 	@Transactional

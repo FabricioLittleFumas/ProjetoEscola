@@ -55,6 +55,11 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authz -> authz
 		                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 		                .requestMatchers("/autentica/**").permitAll()
+		                .requestMatchers(HttpMethod.GET, "/logs").permitAll()
+		                .requestMatchers(HttpMethod.POST, "/logs", "/logs/**").denyAll()
+		                .requestMatchers(HttpMethod.PUT, "/logs", "/logs/**").denyAll()
+		                .requestMatchers(HttpMethod.PATCH, "/logs", "/logs/**").denyAll()
+		                .requestMatchers(HttpMethod.DELETE, "/logs", "/logs/**").denyAll()
 		                .requestMatchers(HttpMethod.POST, "/usuario/saveUser").permitAll()
 		                .requestMatchers(HttpMethod.GET, "/usuario").hasAuthority("ADMIN")
 		                .requestMatchers(HttpMethod.GET, "/usuario/pendentes").hasAuthority("ADMIN")

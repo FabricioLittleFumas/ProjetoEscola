@@ -17,6 +17,7 @@ import br.com.escolaDuartina.dto.UsuarioResumo;
 import br.com.escolaDuartina.repository.IUserService;
 import br.com.escolaDuartina.service.UserServiceImpl;
 import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/usuario")
@@ -57,8 +58,12 @@ public class UserController {
 	@PatchMapping("/{id}/aprovacao")
 	public ResponseEntity<UsuarioResumo> atualizarAprovacao(
 			@PathVariable("id") Integer id,
-			@RequestBody AprovacaoUsuarioRequest request) {
+			@RequestBody AprovacaoUsuarioRequest request,
+			HttpServletRequest httpRequest) {
+		User antigo = userManagementService.buscarPorId(id);
+		httpRequest.setAttribute("logSystem.oldObject", antigo);
 		User user = userManagementService.atualizarAprovacao(id, request.aprovado());
+		httpRequest.setAttribute("logSystem.newObject", user);
 		return ResponseEntity.ok(new UsuarioResumo(user.getId(), user.getName(), user.getEmail(), user.isApproved()));
 	}
 }

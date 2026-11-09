@@ -19,6 +19,7 @@ import br.com.escolaDuartina.model.Aluno;
 import br.com.escolaDuartina.dto.PaginaResposta;
 import br.com.escolaDuartina.service.AlunoService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @CrossOrigin(origins = "http://127.0.0.1:4200")
@@ -71,14 +72,22 @@ public class AlunoController {
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deletarPorId(@PathVariable(name = "id") Long id){
+	public ResponseEntity<Void> deletarPorId(@PathVariable(name = "id") Long id, HttpServletRequest request){
+		try {
+			request.setAttribute("logSystem.oldObject", alunoService.buscarPorID(id));
+		} catch (RuntimeException ignored) {
+			request.setAttribute("logSystem.oldObject", "id=" + id);
+		}
 		alunoService.deletarPorId(id);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping("/{id}")
-	public ResponseEntity<Aluno> atualizaAluno(@PathVariable(name = "id") long id, @RequestBody Aluno AlunoAtualizado){
+	public ResponseEntity<Aluno> atualizaAluno(@PathVariable(name = "id") long id, @RequestBody Aluno AlunoAtualizado,
+			HttpServletRequest request){
+		request.setAttribute("logSystem.oldObject", alunoService.buscarPorID(id));
 		Aluno aluno = alunoService.atualizarAluno(id, AlunoAtualizado);
+		request.setAttribute("logSystem.newObject", aluno);
 		return new ResponseEntity<Aluno>(aluno, HttpStatus.ACCEPTED);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
