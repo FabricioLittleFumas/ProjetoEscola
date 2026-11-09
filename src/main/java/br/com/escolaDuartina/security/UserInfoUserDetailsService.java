@@ -23,14 +23,14 @@ public class UserInfoUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		@SuppressWarnings("unchecked")
-		Optional<User> opt = (Optional<User>) userRepo.findUserByEmail(email);
+		Optional<User> opt = userRepo.findUserByEmail(email);
 
 		if (opt.isEmpty()) {
 			throw new UsernameNotFoundException("User with email: " + email + " not found !");
 		} else {
 			User user = opt.get();
 			return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+					user.isApproved(), true, true, true,
 					(Collection<? extends GrantedAuthority>) user.getRoles().stream()
 							.map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toSet()));
 		}

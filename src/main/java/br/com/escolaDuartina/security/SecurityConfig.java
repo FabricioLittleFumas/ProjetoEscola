@@ -54,7 +54,11 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())).csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(authz -> authz
 		                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-		                .requestMatchers("/autentica/**", "/usuario/**").permitAll()
+		                .requestMatchers("/autentica/**").permitAll()
+		                .requestMatchers(HttpMethod.POST, "/usuario/saveUser").permitAll()
+		                .requestMatchers(HttpMethod.GET, "/usuario").hasAuthority("ADMIN")
+		                .requestMatchers(HttpMethod.GET, "/usuario/pendentes").hasAuthority("ADMIN")
+		                .requestMatchers(HttpMethod.PATCH, "/usuario/*/aprovacao").hasAuthority("ADMIN")
 		                .requestMatchers(HttpMethod.GET, "/alunos/paginado").permitAll()
 			                .requestMatchers(HttpMethod.GET, "/alunos", "/alunos/**").permitAll()
 		                .requestMatchers(HttpMethod.POST, "/alunos/**").hasAuthority("USER")
