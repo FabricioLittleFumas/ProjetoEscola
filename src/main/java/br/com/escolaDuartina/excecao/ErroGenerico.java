@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -69,6 +70,16 @@ public class ErroGenerico {
 	        erroTipo.setStatus(HttpStatus.UNAUTHORIZED.value());
 	        erroTipo.setPath(request.getRequestURI());
 	        return new ResponseEntity<>(erroTipo, HttpStatus.UNAUTHORIZED);
+	    }
+
+	    @ExceptionHandler(DisabledException.class)
+	    public ResponseEntity<ErroTipo> usuarioAguardandoAprovacao(DisabledException ex, HttpServletRequest request) {
+	        ErroTipo erroTipo = new ErroTipo();
+	        erroTipo.setMessage("Seu cadastro está aguardando a aprovação de um administrador.");
+	        erroTipo.setError("Cadastro pendente de aprovação");
+	        erroTipo.setStatus(HttpStatus.FORBIDDEN.value());
+	        erroTipo.setPath(request.getRequestURI());
+	        return new ResponseEntity<>(erroTipo, HttpStatus.FORBIDDEN);
 	    }
 
 	    @ExceptionHandler(AuthenticationException.class)
