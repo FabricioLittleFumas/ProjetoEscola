@@ -32,10 +32,9 @@ public class UserController {
 	// Read Form data to save into DB
 	@PostMapping("/saveUser")
 	public ResponseEntity<Integer> saveUser(
-			@RequestBody User user) 
-	{
+			@RequestBody User user, HttpServletRequest request) {
 		Integer id = userService.saveUser(user);
-		String message = "User '"+id+"' saved successfully !";
+		request.setAttribute("logSystem.newObject", new UsuarioResumo(id, user.getName(), user.getEmail(), user.isApproved()));
 		return new ResponseEntity<Integer>(id, HttpStatus.ACCEPTED);
 	}
 
@@ -61,9 +60,9 @@ public class UserController {
 			@RequestBody AprovacaoUsuarioRequest request,
 			HttpServletRequest httpRequest) {
 		User antigo = userManagementService.buscarPorId(id);
-		httpRequest.setAttribute("logSystem.oldObject", antigo);
+		httpRequest.setAttribute("logSystem.oldObject",
+				new UsuarioResumo(antigo.getId(), antigo.getName(), antigo.getEmail(), antigo.isApproved()));
 		User user = userManagementService.atualizarAprovacao(id, request.aprovado());
-		httpRequest.setAttribute("logSystem.newObject", user);
 		return ResponseEntity.ok(new UsuarioResumo(user.getId(), user.getName(), user.getEmail(), user.isApproved()));
 	}
 }

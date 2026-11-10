@@ -19,8 +19,10 @@ import br.com.escolaDuartina.model.JwtRequest;
 import br.com.escolaDuartina.model.JwtResponse;
 import br.com.escolaDuartina.model.RefreshToken;
 import br.com.escolaDuartina.security.JwtTokenUtil;
+import br.com.escolaDuartina.security.LogSystemInterceptor;
 import br.com.escolaDuartina.security.UserInfoUserDetailsService;
 import br.com.escolaDuartina.service.RefreshTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/autentica")
@@ -32,14 +34,16 @@ public class AuthController {
     @Autowired private UserInfoUserDetailsService userDetailsService;
     @Autowired private RefreshTokenService refreshTokenService;
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) {
+    @PostMapping({"/authenticate", "/authenticate/modal-entrar"})
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest,
+            HttpServletRequest request) {
         authenticate(authenticationRequest.getEmail(), authenticationRequest.getPassword());
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
         final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
+        request.setAttribute(LogSystemInterceptor.LOGIN_EMAIL_ATTRIBUTE, userDetails.getUsername());
         return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
     }
 

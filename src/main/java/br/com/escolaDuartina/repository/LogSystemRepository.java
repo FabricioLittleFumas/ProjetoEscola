@@ -9,5 +9,5 @@ import br.com.escolaDuartina.model.LogSystem;
 public interface LogSystemRepository extends Repository<LogSystem, Long> {
 	LogSystem save(LogSystem log);
 
-	Page<LogSystem> findAllByOrderByDataHoraDesc(Pageable pageable);
+	Page<LogSystem> findAllByOrderByDataHoraDescIdDesc(Pageable pageable);
 }

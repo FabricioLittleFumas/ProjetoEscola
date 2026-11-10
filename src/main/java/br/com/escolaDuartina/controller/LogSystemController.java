@@ -2,7 +2,6 @@ package br.com.escolaDuartina.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +29,7 @@ public class LogSystemController {
 			@RequestParam(name = "size", defaultValue = "25") int size) {
 		int paginaValida = Math.max(0, page);
 		int tamanhoValido = Math.min(Math.max(1, size), 100);
-		Page<LogSystemResposta> resultado = logService.listar(PageRequest.of(paginaValida, tamanhoValido,
-				Sort.by(Sort.Direction.DESC, "dataHora")));
+		Page<LogSystemResposta> resultado = logService.listar(PageRequest.of(paginaValida, tamanhoValido));
 		PaginaResposta<LogSystemResposta> resposta = new PaginaResposta<>(resultado.getContent(), resultado.getNumber(),
 				resultado.getSize(), resultado.getTotalElements(), resultado.getTotalPages(), resultado.isFirst(),
 				resultado.isLast());
