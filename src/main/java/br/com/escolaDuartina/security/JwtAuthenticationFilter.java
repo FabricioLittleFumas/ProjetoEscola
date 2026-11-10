@@ -9,9 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,11 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        HttpServletRequest requestWithCachedBody = request instanceof ContentCachingRequestWrapper
-                ? request
-                : new ContentCachingRequestWrapper(request, 1024 * 1024);
-
-        final String requestTokenHeader = requestWithCachedBody.getHeader("Authorization");
+        final String requestTokenHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwtToken = null;
@@ -50,17 +45,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
                         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
-                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestWithCachedBody));
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     }
                 }
-            } catch (IllegalArgumentException e) {
-                logger.debug("Unable to get JWT Token", e);
-            } catch (ExpiredJwtException e) {
-                logger.debug("JWT Token has expired", e);
+            } catch (IllegalArgumentException | JwtException e) {
+                logger.debug("Unable to authenticate JWT", e);
             }
         }
 
-        chain.doFilter(requestWithCachedBody, response);
+        chain.doFilter(request, response);
     }
 }

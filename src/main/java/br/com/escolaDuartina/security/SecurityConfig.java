@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -49,7 +50,8 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http, LogSystemInterceptor logInterceptor) throws Exception {
+		var accessDeniedHandler = new AccessDeniedHandlerImpl();
 
 		http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())).csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(authz -> authz
@@ -70,7 +72,11 @@ public class SecurityConfig {
 		                .requestMatchers(HttpMethod.PUT, "/alunos/**").hasAuthority("USER")
 		                .requestMatchers(HttpMethod.DELETE, "/alunos/**").hasAuthority("USER")
 		                .anyRequest().authenticated())
-				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+						.accessDeniedHandler((request, response, exception) -> {
+							accessDeniedHandler.handle(request, response, exception);
+							logInterceptor.afterCompletion(request, response, null, null);
+						}))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.com.escolaDuartina.excecao.Excecao;
 import br.com.escolaDuartina.excecao.ExcecaoInserirAluno;
@@ -43,15 +44,24 @@ public class AlunoService {
 		return aluno.orElseThrow(() -> new Excecao("erro ao buscar aluno"));
 	}
 
-	public void deletarPorId(Long id) {
-		alunoRepository.deleteById(id);
+	@Transactional
+	public Aluno deletarPorId(Long id) {
+		var aluno = alunoRepository.buscarParaAlteracao(id);
+		aluno.ifPresent(alunoRepository::delete);
+		return aluno.orElse(null);
 	}
 
-	public Aluno atualizarAluno(long id, Aluno alunoAtualizado) {
-		// TODO Auto-generated method stub
-		Aluno aluno = buscarPorID(id);
+	@Transactional
+	public AtualizacaoAluno atualizarAluno(long id, Aluno alunoAtualizado) {
+		Aluno aluno = alunoRepository.buscarParaAlteracao(id)
+				.orElseThrow(() -> new Excecao("erro ao buscar aluno"));
+		Aluno antigo = new Aluno();
+		BeanUtils.copyProperties(aluno, antigo);
 		BeanUtils.copyProperties(alunoAtualizado, aluno, "id");
-		return alunoRepository.save(aluno);
+		return new AtualizacaoAluno(antigo, alunoRepository.save(aluno));
+	}
+
+	public record AtualizacaoAluno(Aluno antigo, Aluno novo) {
 	}
 
 	public Aluno inserirAluno(Aluno aluno) {

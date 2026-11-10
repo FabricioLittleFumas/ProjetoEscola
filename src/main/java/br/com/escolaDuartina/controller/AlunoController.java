@@ -1,6 +1,7 @@
 package br.com.escolaDuartina.controller;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,22 +74,18 @@ public class AlunoController {
 	@CrossOrigin(origins = "http://localhost:4200")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletarPorId(@PathVariable(name = "id") Long id, HttpServletRequest request){
-		try {
-			request.setAttribute("logSystem.oldObject", alunoService.buscarPorID(id));
-		} catch (RuntimeException ignored) {
-			request.setAttribute("logSystem.oldObject", "id=" + id);
-		}
-		alunoService.deletarPorId(id);
+		Aluno excluido = alunoService.deletarPorId(id);
+		request.setAttribute("logSystem.oldObject", excluido == null ? Map.of("id", id) : excluido);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PutMapping("/{id}")
 	public ResponseEntity<Aluno> atualizaAluno(@PathVariable(name = "id") long id, @RequestBody Aluno AlunoAtualizado,
 			HttpServletRequest request){
-		request.setAttribute("logSystem.oldObject", alunoService.buscarPorID(id));
-		Aluno aluno = alunoService.atualizarAluno(id, AlunoAtualizado);
-		request.setAttribute("logSystem.newObject", aluno);
-		return new ResponseEntity<Aluno>(aluno, HttpStatus.ACCEPTED);
+		var atualizacao = alunoService.atualizarAluno(id, AlunoAtualizado);
+		request.setAttribute("logSystem.oldObject", atualizacao.antigo());
+		request.setAttribute("logSystem.newObject", atualizacao.novo());
+		return new ResponseEntity<Aluno>(atualizacao.novo(), HttpStatus.ACCEPTED);
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping({"", "/"})
