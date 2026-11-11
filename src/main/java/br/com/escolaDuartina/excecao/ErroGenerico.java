@@ -16,6 +16,25 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class ErroGenerico {
+    @ExceptionHandler(PdfLeituraException.class)
+    public ResponseEntity<ErroTipo> erroPdf(PdfLeituraException ex, HttpServletRequest request) {
+        return respostaPdf(ex.getStatus(), ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErroTipo> arquivoGrande(HttpServletRequest request) {
+        return respostaPdf(HttpStatus.PAYLOAD_TOO_LARGE, "O PDF deve ter at? 25 MB.", request);
+    }
+
+    private ResponseEntity<ErroTipo> respostaPdf(HttpStatus status, String message, HttpServletRequest request) {
+        ErroTipo erro = new ErroTipo();
+        erro.setMessage(message);
+        erro.setError("Erro na leitura do PDF.");
+        erro.setStatus(status.value());
+        erro.setPath(request.getRequestURI());
+        return new ResponseEntity<>(erro, status);
+    }
+
 
 	 @ExceptionHandler(Excecao.class)
 	    public ResponseEntity<ErroTipo> erroNaoEncontrado(Excecao ex, HttpServletRequest request) {

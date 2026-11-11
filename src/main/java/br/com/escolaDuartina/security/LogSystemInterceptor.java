@@ -116,10 +116,17 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 
 	private String dadosResposta(HttpServletResponse response, String path, int status) {
 		if (status >= 400) return "objeto não disponível";
+		if ("/leitura-pdf/voz".equals(path)) return "Áudio neural gerado";
 		String json = responseJson(response);
 		if ("/home".equals(path) || "/welcome".equals(path)) return json;
 		try {
 			JsonNode dados = objectMapper.readTree(json);
+			if ("/leitura-pdf".equals(path) && dados != null) {
+				ObjectNode resumo = objectMapper.createObjectNode();
+				resumo.set("nome", dados.get("nome"));
+				resumo.set("totalPaginas", dados.get("totalPaginas"));
+				return resumo.toString();
+			}
 			if (dados != null && dados.has("content") && dados.get("content").isArray()) {
 				dados = dados.get("content");
 			}
