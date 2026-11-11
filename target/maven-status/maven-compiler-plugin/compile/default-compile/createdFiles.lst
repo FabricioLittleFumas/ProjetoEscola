@@ -1,0 +1,8 @@
+br\com\escolaDuartina\service\VozNeuralService.class
+br\com\escolaDuartina\excecao\PdfLeituraException.class
+br\com\escolaDuartina\controller\PdfLeituraController$Documento.class
+br\com\escolaDuartina\controller\PdfLeituraController.class
+br\com\escolaDuartina\controller\PdfLeituraController$Pagina.class
+br\com\escolaDuartina\controller\VozNeuralController$Voz.class
+br\com\escolaDuartina\controller\VozNeuralController.class
+br\com\escolaDuartina\controller\VozNeuralController$Pedido.class
