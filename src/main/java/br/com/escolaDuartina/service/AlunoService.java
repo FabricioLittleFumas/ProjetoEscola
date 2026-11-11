@@ -90,8 +90,9 @@ public class AlunoService {
 	public Page<Aluno> buscarPagina(int pagina, int tamanho, String ordenacao, String direcao, String nome) {
 		int paginaValida = Math.max(pagina, 0);
 		int tamanhoValido = Math.min(Math.max(tamanho, 1), 100);
-		Set<String> camposOrdenaveis = Set.of("id", "nome", "data_saida", "dataSaida", "unidade");
-		String campoOrdenacao = camposOrdenaveis.contains(ordenacao) ? ("dataSaida".equals(ordenacao) ? "data_saida" : ordenacao) : "nome";
+		Set<String> camposOrdenaveis = Set.of("id", "rm", "nome", "data_nascimento", "dataNascimento", "unidade");
+		String campoOrdenacao = "data_nascimento".equals(ordenacao) ? "dataNascimento"
+				: camposOrdenaveis.contains(ordenacao) ? ordenacao : "nome";
 		Sort.Direction sentido = "DESC".equalsIgnoreCase(direcao) ? Sort.Direction.DESC : Sort.Direction.ASC;
 		Pageable pageable = PageRequest.of(paginaValida, tamanhoValido, Sort.by(sentido, campoOrdenacao));
 		String nomeNormalizado = nome == null ? "" : nome.trim();

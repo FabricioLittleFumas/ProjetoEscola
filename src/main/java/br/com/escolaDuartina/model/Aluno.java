@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import br.com.escolaDuartina.enums.Unidade;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
@@ -49,11 +51,16 @@ public class Aluno implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String nome;
 
+	@Column(name = "registro_matricula")
+	@Min(value = 1, message = "O RM deve ser maior que zero")
+	private int rm;
+
 	@Temporal(TemporalType.DATE)
 	@Past(message = "A data deve ser no passado")
 	@Column(name = "data_saida", nullable = false)
 //	@JsonFormat(pattern = "dd/MM/yyyy")
-	private Date data_saida;
+	@JsonProperty("data_nascimento")
+	private Date dataNascimento;
 
 	@Enumerated(EnumType.STRING) // Armazena "ESTADUAL", "MUNICIPAL", etc.
 	private Unidade unidade;
