@@ -57,7 +57,7 @@ public class Aluno implements Serializable {
 
 	@Temporal(TemporalType.DATE)
 	@Past(message = "A data deve ser no passado")
-	@Column(name = "data_saida", nullable = false)
+	@Column(name = "data_saida", nullable = true)
 //	@JsonFormat(pattern = "dd/MM/yyyy")
 	@JsonProperty("data_nascimento")
 	private Date dataNascimento;

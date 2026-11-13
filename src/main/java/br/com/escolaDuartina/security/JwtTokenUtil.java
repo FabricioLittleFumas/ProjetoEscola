@@ -18,8 +18,8 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtTokenUtil {
 
-	// Access Token: 15 minutos
-	public static final long ACCESS_TOKEN_VALIDITY = 15 * 60;
+	// Access Token: 7 horas
+	public static final long ACCESS_TOKEN_VALIDITY = 7 * 60 * 60;
 
 	@Value("${jwt.secret}")
 	private String secret;
