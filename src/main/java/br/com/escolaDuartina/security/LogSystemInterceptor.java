@@ -44,7 +44,8 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		String path = request.getRequestURI().substring(request.getContextPath().length());
 		if ("/logs".equals(path) || path.startsWith("/logs/")) return;
 
-		if (HttpMethod.POST.matches(request.getMethod()) && "/autentica/authenticate/modal-entrar".equals(path)) {
+		if (HttpMethod.POST.matches(request.getMethod()) && ("/autentica/authenticate/modal-entrar".equals(path)
+				|| "/autentica/authenticate".equals(path))) {
 			int status = response.getStatus();
 			if (exception == null && status >= 200 && status < 300
 					&& request.getAttribute(LOGIN_EMAIL_ATTRIBUTE) instanceof String email) {
@@ -80,15 +81,21 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		if (HttpMethod.PATCH.matches(metodo) || HttpMethod.PUT.matches(metodo)) {
 			Object antigo = request.getAttribute(OLD_OBJECT);
 			Object novo = request.getAttribute(NEW_OBJECT);
-			acoes.add("Atualização valor antigo: " + classe + " -> " + representar(antigo)
-					+ ", HTTP " + status);
-			acoes.add("Atualização valor novo: " + classe + " -> " + (novo == null
-					? dadosResposta(response, path, status) : representar(novo)) + ", HTTP " + status);
+			String antes = antigo == null ? "dados anteriores indisponíveis" : resumo(antigo);
+			Object objetoNovo = novo == null ? dadosResposta(response, path, status) : novo;
+			String depois = objetoNovo instanceof String texto ? resumoTexto(texto) : resumo(objetoNovo);
+			if (HttpMethod.PATCH.matches(metodo) && path.matches("/usuario/\\d+/aprovacao")) {
+				depois = resumoAprovacao(novo, antigo);
+			}
+			String acao = "Atualizou " + nomeDaEntidade(classe) + " | Antes: " + antes + " | Depois: " + depois
+					+ " | Resultado: " + resultado(status);
+			acoes.add(acao);
 		} else {
 			String rotulo = rotulo(metodo);
 			Object objeto = request.getAttribute(HttpMethod.DELETE.matches(metodo) ? OLD_OBJECT : NEW_OBJECT);
-			String dados = objeto == null ? dadosResposta(response, path, status) : representar(objeto);
-			acoes.add(rotulo + ": " + classe + " -> " + dados + ", HTTP " + status);
+			Object dados = objeto == null ? dadosResposta(response, path, status) : objeto;
+			acoes.add(rotulo + " " + nomeDaEntidade(classe) + ": " + resumoOuTexto(dados)
+					+ " | Resultado: " + resultado(status));
 		}
 
 		try {
@@ -99,10 +106,92 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 	}
 
 	private String rotulo(String metodo) {
-		if (HttpMethod.POST.matches(metodo)) return "Inclusão";
-		if (HttpMethod.DELETE.matches(metodo)) return "Exclusão";
-		if (HttpMethod.GET.matches(metodo)) return "Consulta";
+		if (HttpMethod.POST.matches(metodo)) return "Cadastrou";
+		if (HttpMethod.DELETE.matches(metodo)) return "Excluiu";
+		if (HttpMethod.GET.matches(metodo)) return "Consultou";
 		return "Ação";
+	}
+
+	private String nomeDaEntidade(String classe) {
+		return switch (classe) {
+		case "Aluno" -> "aluno";
+		case "User" -> "usuário";
+		case "LogSystem" -> "log do sistema";
+		default -> classe.toLowerCase(Locale.ROOT);
+		};
+	}
+
+	private String resultado(int status) {
+		return status >= 200 && status < 300 ? "concluído" : "falhou (HTTP " + status + ")";
+	}
+
+	private String resumoOuTexto(Object objeto) {
+		return objeto instanceof String texto ? resumoTexto(texto) : resumo(objeto);
+	}
+
+	private String resumoTexto(String texto) {
+		if (texto == null || texto.isBlank() || "objeto não disponível".equals(texto)) return "detalhes indisponíveis";
+		try {
+			return resumo(objectMapper.readTree(texto));
+		} catch (Exception invalidJson) {
+			return texto;
+		}
+	}
+
+	private String resumo(Object objeto) {
+		if (objeto == null) return "detalhes indisponíveis";
+		JsonNode dados = objeto instanceof JsonNode node ? node : objectMapper.valueToTree(objeto);
+		mascararCredenciais(dados);
+		if (dados.isArray()) return "consulta retornou " + dados.size() + " registro(s)";
+		if (!dados.isObject()) return dados.asText("detalhes indisponíveis");
+		if (dados.has("accessToken") || dados.has("refreshToken")) return "sessão autenticada";
+		if (dados.has("approved") || dados.has("aprovado")) {
+			return (dados.path("approved").asBoolean(dados.path("aprovado").asBoolean())
+					? "usuário aprovado" : "aprovação pendente") + resumoIdentificacao(dados);
+		}
+
+		List<String> campos = new ArrayList<>();
+		adicionarCampo(dados, campos, "nome", "nome");
+		adicionarCampo(dados, campos, "name", "nome");
+		adicionarCampo(dados, campos, "rm", "RM");
+		adicionarCampo(dados, campos, "registro_matricula", "RM");
+		adicionarCampo(dados, campos, "unidade", "unidade");
+		adicionarCampo(dados, campos, "data_nascimento", "nascimento");
+		adicionarCampo(dados, campos, "dataNascimento", "nascimento");
+		adicionarCampo(dados, campos, "email", "e-mail");
+		adicionarCampo(dados, campos, "approved", "aprovação");
+		adicionarCampo(dados, campos, "aprovado", "aprovação");
+		adicionarCampo(dados, campos, "id", "ID");
+		adicionarCampo(dados, campos, "totalPaginas", "total de páginas");
+		return campos.isEmpty() ? "registro atualizado" : String.join(" | ", campos);
+	}
+
+	private String resumoIdentificacao(JsonNode dados) {
+		List<String> campos = new ArrayList<>();
+		adicionarCampo(dados, campos, "name", "nome");
+		adicionarCampo(dados, campos, "email", "e-mail");
+		adicionarCampo(dados, campos, "id", "ID");
+		return campos.isEmpty() ? "" : " | " + String.join(" | ", campos);
+	}
+
+	private String resumoAprovacao(Object novo, Object antigo) {
+		JsonNode atualizado = novo == null ? null : objectMapper.valueToTree(novo);
+		JsonNode anterior = antigo == null ? null : objectMapper.valueToTree(antigo);
+		if (atualizado == null || anterior == null) return "status de aprovação atualizado";
+		boolean aprovada = atualizado.path("approved").asBoolean();
+		String statusNovo = aprovada ? "aprovado" : "pendente";
+		String statusAnterior = anterior.path("approved").asBoolean() ? "aprovado" : "pendente";
+		return statusAnterior + " → " + statusNovo + resumoIdentificacao(atualizado);
+	}
+
+	private void adicionarCampo(JsonNode dados, List<String> campos, String chave, String rotulo) {
+		JsonNode valor = dados.get(chave);
+		if (valor != null && !valor.isNull() && !valor.isContainerNode()) {
+			String texto = valor.asText();
+			if (!texto.isBlank() && campos.stream().noneMatch(campo -> campo.startsWith(rotulo + ":"))) {
+				campos.add(rotulo + ": " + texto);
+			}
+		}
 	}
 
 	private String classeEntidade(Object handler, String path) {
@@ -118,29 +207,25 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		if (status >= 400) return "objeto não disponível";
 		if ("/leitura-pdf/voz".equals(path)) return "Áudio neural gerado";
 		String json = responseJson(response);
-		if ("/home".equals(path) || "/welcome".equals(path)) return json;
+		if ("/home".equals(path) || "/welcome".equals(path) || "/autentica/refresh".equals(path)) {
+			return "operação concluída";
+		}
 		try {
 			JsonNode dados = objectMapper.readTree(json);
 			if ("/leitura-pdf".equals(path) && dados != null) {
 				ObjectNode resumo = objectMapper.createObjectNode();
 				resumo.set("nome", dados.get("nome"));
 				resumo.set("totalPaginas", dados.get("totalPaginas"));
-				return resumo.toString();
+				return resumo(resumo);
 			}
 			if (dados != null && dados.has("content") && dados.get("content").isArray()) {
-				dados = dados.get("content");
+				return "consulta retornou " + dados.path("totalElements").asInt(dados.get("content").size())
+						+ " registro(s)";
 			}
-			return representar(dados);
+			return resumo(dados);
 		} catch (Exception invalidJson) {
 			return "objeto não disponível";
 		}
-	}
-
-	private String representar(Object objeto) {
-		if (objeto == null) return "objeto não disponível";
-		JsonNode dados = objectMapper.valueToTree(objeto);
-		mascararCredenciais(dados);
-		return dados.toString();
 	}
 
 	private String responseJson(HttpServletResponse response) {

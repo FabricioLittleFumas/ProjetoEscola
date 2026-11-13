@@ -26,10 +26,11 @@ public class LogSystemController {
 	@GetMapping
 	public ResponseEntity<PaginaResposta<LogSystemResposta>> listar(
 			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(name = "size", defaultValue = "25") int size) {
+			@RequestParam(name = "size", defaultValue = "25") int size,
+			@RequestParam(name = "acao", defaultValue = "") String acao) {
 		int paginaValida = Math.max(0, page);
 		int tamanhoValido = Math.min(Math.max(1, size), 100);
-		Page<LogSystemResposta> resultado = logService.listar(PageRequest.of(paginaValida, tamanhoValido));
+		Page<LogSystemResposta> resultado = logService.listar(acao, PageRequest.of(paginaValida, tamanhoValido));
 		PaginaResposta<LogSystemResposta> resposta = new PaginaResposta<>(resultado.getContent(), resultado.getNumber(),
 				resultado.getSize(), resultado.getTotalElements(), resultado.getTotalPages(), resultado.isFirst(),
 				resultado.isLast());

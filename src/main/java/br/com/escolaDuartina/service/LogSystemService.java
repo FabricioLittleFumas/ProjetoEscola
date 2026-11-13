@@ -31,18 +31,32 @@ public class LogSystemService {
 	@Transactional
 	public void registrarLogin(String emailUsuario, int status) {
 		userRepository.findUserByEmail(emailUsuario).ifPresent(usuario ->
-				logRepository.save(new LogSystem("Login: " + usuario.getName() + " (HTTP " + status + ")", usuario)));
+				logRepository.save(new LogSystem("Login realizado | Resultado: " + resultado(status), usuario)));
 	}
 
 	@Transactional
 	public void registrarConsultaAposLogin(String emailUsuario, int status) {
 		userRepository.findUserByEmail(emailUsuario).ifPresent(usuario ->
-				logRepository.save(new LogSystem("Consulta: User -> " + usuario.getName() + ", HTTP " + status, usuario)));
+				logRepository.save(new LogSystem("Consultou usuários pendentes após entrar | Resultado: "
+						+ resultado(status), usuario)));
+	}
+
+	private String resultado(int status) {
+		return status >= 200 && status < 300 ? "concluído" : "falhou (HTTP " + status + ")";
 	}
 
 	@Transactional(readOnly = true)
 	public Page<LogSystemResposta> listar(Pageable pageable) {
-		return logRepository.findAllByOrderByDataHoraDescIdDesc(pageable).map(log -> new LogSystemResposta(
+		return listar("", pageable);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<LogSystemResposta> listar(String acao, Pageable pageable) {
+		String filtro = acao == null ? "" : acao.trim();
+		Page<LogSystem> pagina = filtro.isEmpty()
+				? logRepository.findAllByOrderByDataHoraDescIdDesc(pageable)
+				: logRepository.buscarPorAcaoSemAcento(filtro, pageable);
+		return pagina.map(log -> new LogSystemResposta(
 				log.getId(), log.getAcao(), log.getUsuario().getId().longValue(), log.getUsuario().getName(),
 				log.getDataHora()));
 	}

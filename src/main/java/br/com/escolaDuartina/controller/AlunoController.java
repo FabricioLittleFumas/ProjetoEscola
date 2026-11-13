@@ -89,8 +89,9 @@ public class AlunoController {
 	}
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping({"", "/"})
-	public ResponseEntity<Aluno> inserirAluno(@Valid @RequestBody Aluno aluno){
+	public ResponseEntity<Aluno> inserirAluno(@Valid @RequestBody Aluno aluno, HttpServletRequest request){
 		Aluno aluno2 = alunoService.inserirAluno(aluno);
+		request.setAttribute("logSystem.newObject", aluno2);
 		return new ResponseEntity<Aluno>(aluno2, HttpStatus.CREATED);
 	}
 
