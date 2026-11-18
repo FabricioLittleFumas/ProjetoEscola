@@ -63,6 +63,8 @@ public class UserController {
 		httpRequest.setAttribute("logSystem.oldObject",
 				new UsuarioResumo(antigo.getId(), antigo.getName(), antigo.getEmail(), antigo.isApproved()));
 		User user = userManagementService.atualizarAprovacao(id, request.aprovado());
-		return ResponseEntity.ok(new UsuarioResumo(user.getId(), user.getName(), user.getEmail(), user.isApproved()));
+		UsuarioResumo atualizado = new UsuarioResumo(user.getId(), user.getName(), user.getEmail(), user.isApproved());
+		httpRequest.setAttribute("logSystem.newObject", atualizado);
+		return ResponseEntity.ok(atualizado);
 	}
 }

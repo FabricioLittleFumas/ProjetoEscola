@@ -27,3 +27,7 @@ replay_pid*
 .tts-venv/
 tts/models/
 tts/__pycache__/
+
+# Spring SQL seed files
+src/main/resources/import.sql
+src/main/resources/data.sql
