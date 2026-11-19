@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -44,6 +45,38 @@ public class UserServiceImpl implements IUserService {
 	@Transactional(readOnly = true)
 	public User buscarPorId(Integer id) {
 		return userRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Usuário não encontrado"));
+	}
+
+	@Transactional(readOnly = true)
+	public User buscarPorEmail(String email) {
+		return userRepo.findUserByEmail(email)
+				.orElseThrow(() -> new NoSuchElementException("Usuário não encontrado"));
+	}
+
+	@Transactional
+	public User atualizarPerfil(String emailAtual, String nome, String email, String novaSenha) {
+		User usuario = buscarPorEmail(emailAtual);
+		usuario.setName(nome.trim());
+		usuario.setEmail(email.trim());
+		if (novaSenha != null && !novaSenha.isBlank()) {
+			usuario.setPassword(passwordEncoder.encode(novaSenha));
+		}
+		return userRepo.save(usuario);
+	}
+
+	@Transactional
+	public User atualizarUsuario(Integer id, String nome, String email, String novaSenha) {
+		User usuario = buscarPorId(id);
+		String emailNormalizado = email.trim();
+		if (userRepo.existsByEmailAndIdNot(emailNormalizado, id)) {
+			throw new DataIntegrityViolationException("O e-mail informado já está cadastrado.");
+		}
+		usuario.setName(nome.trim());
+		usuario.setEmail(emailNormalizado);
+		if (novaSenha != null && !novaSenha.isBlank()) {
+			usuario.setPassword(passwordEncoder.encode(novaSenha));
+		}
+		return userRepo.save(usuario);
 	}
 
 	@Transactional

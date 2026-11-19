@@ -34,13 +34,6 @@ public class LogSystemService {
 				logRepository.save(new LogSystem("Login realizado | Resultado: " + resultado(status), usuario)));
 	}
 
-	@Transactional
-	public void registrarConsultaAposLogin(String emailUsuario, int status) {
-		userRepository.findUserByEmail(emailUsuario).ifPresent(usuario ->
-				logRepository.save(new LogSystem("Consultou usuários pendentes após entrar | Resultado: "
-						+ resultado(status), usuario)));
-	}
-
 	private String resultado(int status) {
 		return status >= 200 && status < 300 ? "concluído" : "falhou (HTTP " + status + ")";
 	}

@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class LogSystemInterceptor implements HandlerInterceptor {
 	public static final String LOGIN_EMAIL_ATTRIBUTE = "logSystem.loginEmail";
+	public static final String LOG_EMAIL_ATTRIBUTE = "logSystem.emailUsuario";
 	private static final String OLD_OBJECT = "logSystem.oldObject";
 	private static final String NEW_OBJECT = "logSystem.newObject";
 
@@ -64,12 +65,16 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 
 		String metodo = request.getMethod().toUpperCase(Locale.ROOT);
 		String classe = classeEntidade(handler, path);
+		String emailAutor = request.getAttribute(LOG_EMAIL_ATTRIBUTE) instanceof String email
+				? email : userDetails.getUsername();
 		int status = exception != null && response.getStatus() < 400
 				? HttpServletResponse.SC_INTERNAL_SERVER_ERROR : response.getStatus();
 		if (status == HttpServletResponse.SC_OK && HttpMethod.GET.matches(metodo)
 				&& "/usuario/pendentes".equals(path) && "true".equals(request.getParameter("aposLogin"))) {
 			try {
-				logService.registrarConsultaAposLogin(userDetails.getUsername(), status);
+				String resumo = resumoConsultaResposta(response);
+				logService.registrar(emailAutor, List.of("Consultou usuário: " + resumo
+						+ " | Resultado: " + resultado(status)));
 			} catch (RuntimeException logError) {
 				// A resposta original deve ser preservada se o log falhar.
 			}
@@ -99,7 +104,7 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		}
 
 		try {
-			logService.registrar(userDetails.getUsername(), acoes);
+			logService.registrar(emailAutor, acoes);
 		} catch (RuntimeException logError) {
 			// A resposta original deve ser preservada se o log falhar.
 		}
@@ -142,8 +147,11 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		if (objeto == null) return "detalhes indisponíveis";
 		JsonNode dados = objeto instanceof JsonNode node ? node : objectMapper.valueToTree(objeto);
 		mascararCredenciais(dados);
-		if (dados.isArray()) return "consulta retornou " + dados.size() + " registro(s)";
+		if (dados.isArray()) return resumoConsulta(dados, dados.size());
 		if (!dados.isObject()) return dados.asText("detalhes indisponíveis");
+		if (dados.has("content") && dados.get("content").isArray()) {
+			return resumoConsulta(dados.get("content"), dados.path("totalElements").asInt(dados.get("content").size()));
+		}
 		if (dados.has("accessToken") || dados.has("refreshToken")) return "sessão autenticada";
 		if (dados.has("approved") || dados.has("aprovado")) {
 			return (dados.path("approved").asBoolean(dados.path("aprovado").asBoolean())
@@ -164,6 +172,36 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 		adicionarCampo(dados, campos, "id", "ID");
 		adicionarCampo(dados, campos, "totalPaginas", "total de páginas");
 		return campos.isEmpty() ? "registro atualizado" : String.join(" | ", campos);
+	}
+
+	private String resumoConsulta(JsonNode registros, int total) {
+		StringBuilder resumo = new StringBuilder("consulta retornou ").append(total).append(" registro(s)");
+		if (registros == null || !registros.isArray() || registros.isEmpty()) return resumo.toString();
+		List<String> detalhes = new ArrayList<>();
+		registros.forEach(registro -> detalhes.add(resumoRegistro(registro)));
+		return resumo.append(" | Registros: [").append(String.join("; ", detalhes)).append("]").toString();
+	}
+
+	private String resumoConsultaResposta(HttpServletResponse response) {
+		try {
+			JsonNode dados = objectMapper.readTree(responseJson(response));
+			return resumo(dados);
+		} catch (Exception invalidJson) {
+			return "detalhes indisponíveis";
+		}
+	}
+
+	private String resumoRegistro(JsonNode registro) {
+		if (registro == null || !registro.isObject()) return registro == null ? "detalhes indisponíveis" : registro.asText();
+		List<String> campos = new ArrayList<>();
+		registro.fields().forEachRemaining(campo -> {
+			JsonNode valor = campo.getValue();
+			if (valor != null && !valor.isNull()) {
+				String texto = valor.isContainerNode() ? valor.toString() : valor.asText();
+				campos.add(campo.getKey() + ": " + texto);
+			}
+		});
+		return campos.isEmpty() ? "registro sem propriedades" : String.join(", ", campos);
 	}
 
 	private String resumoIdentificacao(JsonNode dados) {
@@ -205,23 +243,12 @@ public class LogSystemInterceptor implements HandlerInterceptor {
 
 	private String dadosResposta(HttpServletResponse response, String path, int status) {
 		if (status >= 400) return "objeto não disponível";
-		if ("/leitura-pdf/voz".equals(path)) return "Áudio neural gerado";
 		String json = responseJson(response);
 		if ("/home".equals(path) || "/welcome".equals(path) || "/autentica/refresh".equals(path)) {
 			return "operação concluída";
 		}
 		try {
 			JsonNode dados = objectMapper.readTree(json);
-			if ("/leitura-pdf".equals(path) && dados != null) {
-				ObjectNode resumo = objectMapper.createObjectNode();
-				resumo.set("nome", dados.get("nome"));
-				resumo.set("totalPaginas", dados.get("totalPaginas"));
-				return resumo(resumo);
-			}
-			if (dados != null && dados.has("content") && dados.get("content").isArray()) {
-				return "consulta retornou " + dados.path("totalElements").asInt(dados.get("content").size())
-						+ " registro(s)";
-			}
 			return resumo(dados);
 		} catch (Exception invalidJson) {
 			return "objeto não disponível";
